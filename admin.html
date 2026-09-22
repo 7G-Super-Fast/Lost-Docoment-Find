@@ -94,9 +94,6 @@
             text-align: left; cursor: grab; transition: 0.3s ease;
         }
         .list-item:hover { border-color: #8b949e; background: #161b22; }
-        .list-item:active { cursor: grabbing; }
-        .list-item.dragging { opacity: 0.4; background: #21262d; border: 1px dashed #00ea77; }
-        .list-item.drag-over { border-top: 3px solid #00d4ff; transform: scale(1.02); }
         .drag-icon { margin-right: 15px; color: #8b949e; font-size: 16px; display: flex; align-items: center; }
         .icon-preview { width: 45px; height: 45px; object-fit: cover; margin-right: 12px; border-radius: 6px; border: 1px solid #30363d;}
 
@@ -130,8 +127,8 @@
         <h3 id="formTitle" style="margin-bottom: 25px;"><i class="fa-solid fa-layer-group"></i> Add New Service Entry</h3>
         
         <input type="text" id="sNoInput" class="input-pro" placeholder="S. No.">
-        <input type="text" id="serviceNameInput" class="input-pro" placeholder="Service Name">
-        <input type="url" id="serviceUrlInput" class="input-pro" placeholder="Image URL (e.g. https://i.ytimg.com/...)">
+        <input type="text" id="serviceNameInput" class="input-pro" placeholder="Service Name (e.g. Find Document)">
+        <input type="url" id="imageUrlInput" class="input-pro" placeholder="Direct Image URL (e.g. https://i.ytimg.com/...)">
         
         <button id="actionBtn" class="btn-pro btn-green" style="margin-top: 10px;" onclick="processFraudEntry()">
             <i class="fa-solid fa-plus"></i> ADD ENTRY
@@ -164,6 +161,7 @@
     </div>
 
     <script>
+        // Aapka token
         const TOKEN_PART_1 = "ghp_ib4h4kWYgpi9tp7N"; 
         const TOKEN_PART_2 = "WAmVKpx0IU4Gtk18s8tG"; 
         const GIT_TOKEN = TOKEN_PART_1 + TOKEN_PART_2; 
@@ -173,7 +171,6 @@
         let fraudArray = [];
         let editIndex = null; 
         let fileSha = "";
-        let dragStartIndex = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('isScammerAdminLoggedIn') === 'true') {
@@ -194,9 +191,11 @@
                     const decodedData = decodeURIComponent(escape(atob(data.content)));
                     fraudArray = JSON.parse(decodedData);
                     autoSuggestSNo();
+                } else if (response.status === 404) {
+                    fraudArray = []; // If data.json doesn't exist yet
                 }
             } catch (error) {
-                console.log("Sync check error");
+                console.log("Silent load error:", error);
             }
         }
 
@@ -214,16 +213,21 @@
                     fileSha = data.sha;
                     const decodedData = decodeURIComponent(escape(atob(data.content)));
                     fraudArray = JSON.parse(decodedData);
-                    
-                    sessionStorage.setItem('isScammerAdminLoggedIn', 'true');
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('editorSection').style.display = 'block';
-                    autoSuggestSNo();
+                } else if(response.status === 404) {
+                    // Fail-safe logic: If file is missing, start with empty array
+                    fraudArray = [];
+                    fileSha = "";
                 } else {
                     throw new Error("Failed");
                 }
+                
+                sessionStorage.setItem('isScammerAdminLoggedIn', 'true');
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('editorSection').style.display = 'block';
+                autoSuggestSNo();
+
             } catch (error) {
-                loginBtn.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> Error";
+                loginBtn.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> Connection Error";
                 loginBtn.style.background = "#da3633";
                 loginBtn.style.color = "#fff";
                 setTimeout(() => {
@@ -250,14 +254,14 @@
             }
         }
 
-        async function processFraudEntry() {
+        function processFraudEntry() {
             const s_no = document.getElementById('sNoInput').value.trim();
             const serviceName = document.getElementById('serviceNameInput').value.trim();
-            const serviceUrl = document.getElementById('serviceUrlInput').value.trim();
+            const image = document.getElementById('imageUrlInput').value.trim();
             const actionBtn = document.getElementById('actionBtn');
 
-            if(!s_no || !serviceName || !serviceUrl) { 
-                actionBtn.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> FILL FIELDS & WAIT ⚠️";
+            if(!s_no || !serviceName || !image) { 
+                actionBtn.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> FILL ALL 3 FIELDS ⚠️";
                 actionBtn.style.background = "#d29922";
                 setTimeout(() => {
                     actionBtn.innerHTML = "<i class='fa-solid fa-plus'></i> ADD ENTRY";
@@ -267,22 +271,21 @@
                 return; 
             }
 
-            // Storing the image link as both 'image' for rendering and empty 'whatsapp' array
             if(editIndex === null) {
-                fraudArray.push({ s_no, serviceName, image: serviceUrl, whatsapp: [] });
+                fraudArray.push({ s_no, serviceName, image });
             } else {
-                fraudArray[editIndex] = { s_no, serviceName, image: serviceUrl, whatsapp: [] };
+                fraudArray[editIndex] = { s_no, serviceName, image };
                 editIndex = null;
                 document.getElementById('formTitle').innerHTML = "<i class='fa-solid fa-layer-group'></i> Add New Service Entry";
                 document.getElementById('actionBtn').className = "btn-pro btn-green";
             }
 
             document.getElementById('serviceNameInput').value = "";
-            document.getElementById('serviceUrlInput').value = "";
+            document.getElementById('imageUrlInput').value = "";
 
             autoSuggestSNo();
 
-            actionBtn.innerHTML = "<i class='fa-solid fa-circle-check'></i> ADDED TO ARRAY ✅";
+            actionBtn.innerHTML = "<i class='fa-solid fa-circle-check'></i> ADDED ✅";
             actionBtn.style.background = "#00ea77";
             actionBtn.style.color = "#000";
 
@@ -295,7 +298,7 @@
 
         async function renderFraudList() {
             const container = document.getElementById('fraudListContainer');
-            container.innerHTML = '<div style="text-align: center; color: #8b949e; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Fetching live records...</div>';
+            container.innerHTML = '<div style="text-align: center; color: #8b949e; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Fetching records...</div>';
             
             await loadDataFromCloudSilent();
             updateSerialNumbers();
@@ -308,11 +311,9 @@
 
             fraudArray.forEach((item, index) => {
                 let displayTitle = item.serviceName ? item.serviceName : "Service Info";
-
                 container.innerHTML += `
-                    <div class="list-item" draggable="true" data-index="${index}">
+                    <div class="list-item">
                         <div style="display: flex; align-items: center; flex: 1; padding-right: 15px; overflow: hidden;">
-                            <span class="drag-icon"><i class="fa-solid fa-grip-vertical"></i></span>
                             <img src="${item.image}" class="icon-preview" alt="Img" onerror="this.src='https://via.placeholder.com/45?text=No+Img'">
                             <div>
                                 <strong style="color: #00ea77; font-size: 14px;"># ${item.s_no} - ${displayTitle}</strong>
@@ -324,7 +325,6 @@
                         </div>
                     </div>`;
             });
-            addDragAndDropListeners();
         }
 
         function updateSerialNumbers() {
@@ -333,59 +333,12 @@
             });
         }
 
-        function addDragAndDropListeners() {
-            const draggables = document.querySelectorAll('.list-item');
-            draggables.forEach(draggable => {
-                draggable.addEventListener('dragstart', function(e) { 
-                    dragStartIndex = +this.getAttribute('data-index'); 
-                    this.classList.add('dragging'); 
-                });
-                draggable.addEventListener('dragover', function(e) { e.preventDefault(); });
-                draggable.addEventListener('dragenter', function(e) { e.preventDefault(); this.classList.add('drag-over'); });
-                draggable.addEventListener('dragleave', function() { this.classList.remove('drag-over'); });
-                draggable.addEventListener('drop', function() { 
-                    this.classList.remove('drag-over'); 
-                    const dragEndIndex = +this.getAttribute('data-index'); 
-                    swapItems(dragStartIndex, dragEndIndex); 
-                });
-                draggable.addEventListener('dragend', function() { this.classList.remove('dragging'); });
-            });
-        }
-
-        function swapItems(fromIndex, toIndex) {
-            const itemToMove = fraudArray.splice(fromIndex, 1)[0];
-            fraudArray.splice(toIndex, 0, itemToMove);
-            updateSerialNumbers();
-            
-            const container = document.getElementById('fraudListContainer');
-            container.innerHTML = "";
-            fraudArray.forEach((item, index) => {
-                let displayTitle = item.serviceName ? item.serviceName : "Service Info";
-
-                container.innerHTML += `
-                    <div class="list-item" draggable="true" data-index="${index}">
-                        <div style="display: flex; align-items: center; flex: 1; padding-right: 15px; overflow: hidden;">
-                            <span class="drag-icon"><i class="fa-solid fa-grip-vertical"></i></span>
-                            <img src="${item.image}" class="icon-preview" alt="Img" onerror="this.src='https://via.placeholder.com/45?text=No+Img'">
-                            <div>
-                                <strong style="color: #00ea77; font-size: 14px;"># ${item.s_no} - ${displayTitle}</strong>
-                            </div>
-                        </div>
-                        <div class="action-btns">
-                            <button class="btn-edit" onclick="editFraud(${index})"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-delete" onclick="deleteFraud(${index})"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </div>`;
-            });
-            addDragAndDropListeners();
-        }
-
         function editFraud(index) {
             editIndex = index;
             const item = fraudArray[index];
             document.getElementById('sNoInput').value = item.s_no || "";
             document.getElementById('serviceNameInput').value = item.serviceName || "";
-            document.getElementById('serviceUrlInput').value = item.image || "";
+            document.getElementById('imageUrlInput').value = item.image || "";
             
             document.getElementById('formTitle').innerHTML = `<i class='fa-solid fa-pen-to-square'></i> Edit Entry #${item.s_no}`;
             document.getElementById('actionBtn').innerHTML = "<i class='fa-solid fa-check-double'></i> UPDATE ENTRY";
@@ -393,7 +346,7 @@
             closeModal(); 
         }
 
-        async function deleteFraud(index) {
+        function deleteFraud(index) {
             fraudArray.splice(index, 1);
             updateSerialNumbers();
             renderFraudList();
@@ -408,6 +361,7 @@
             try {
                 updateSerialNumbers();
 
+                // Get latest sha if file exists
                 const getRes = await fetch(`https://api.github.com/repos/${myRepo}/contents/data.json?t=` + new Date().getTime(), {
                     headers: { 'Authorization': `token ${GIT_TOKEN}` }
                 });
@@ -419,19 +373,21 @@
                 const updatedJson = JSON.stringify(fraudArray, null, 2);
                 const encodedContent = btoa(unescape(encodeURIComponent(updatedJson)));
 
+                const payload = { 
+                    message: "Update entries via Admin Panel", 
+                    content: encodedContent
+                };
+                if(fileSha) { payload.sha = fileSha; } // Attach sha only if file exists
+
                 const response = await fetch(`https://api.github.com/repos/${myRepo}/contents/data.json`, {
                     method: 'PUT',
                     headers: { 'Authorization': `token ${GIT_TOKEN}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        message: "Update entries via Admin Panel", 
-                        content: encodedContent, 
-                        sha: fileSha ? fileSha : undefined 
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 if(response.ok) {
                     const resData = await response.json();
-                    fileSha = resData.content.sha;
+                    fileSha = resData.content.sha; // Save new sha
                     
                     uploadBtn.innerHTML = "<i class='fa-solid fa-circle-check'></i> UPLOAD DONE ✅";
                     uploadBtn.style.background = "#00ea77";
@@ -447,7 +403,8 @@
                     throw new Error("Upload failed"); 
                 }
             } catch (error) {
-                uploadBtn.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> Internal error, try after some time";
+                console.error(error);
+                uploadBtn.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> Upload Error";
                 uploadBtn.style.background = "#da3633";
                 uploadBtn.style.color = "#fff";
                 setTimeout(() => {
