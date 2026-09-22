@@ -178,11 +178,12 @@
     <!-- Main Editor Section -->
     <div class="admin-box" id="editorSection" style="display:none; padding-top: 30px;">
         <h3 id="formTitle"><i class="fa-solid fa-layer-group"></i> Add New Service Entry</h3>
-        <p class="subtitle" style="margin-bottom: 20px;">Upload screenshot & add service link.</p>
+        <p class="subtitle" style="margin-bottom: 20px;">Upload screenshot, name & link.</p>
         
+        <!-- Updated input structure with Service Name -->
         <input type="text" id="sNoInput" class="input-pro" placeholder="S. No. (e.g. 1)">
+        <input type="text" id="serviceNameInput" class="input-pro" placeholder="Service Name (e.g. Find Document)">
         
-        <!-- Dynamic Service Links Container -->
         <div id="whatsappFieldsContainer">
             <div class="whatsapp-group">
                 <input type="url" class="input-pro whatsapp-input" placeholder="Service URL (e.g. https://your-site.com)">
@@ -236,8 +237,6 @@
         const GIT_TOKEN = TOKEN_PART_1 + TOKEN_PART_2; 
         
         const IMGBB_API_KEY = "b62a68f570d4e4089f9c45d64c610036";
-        
-        // Yahan par naye repo ka naam update kiya gaya hai
         const myRepo = "7g-super-fast/Lost-Docoment-Find"; 
         
         let fraudArray = [];
@@ -383,6 +382,7 @@
 
         async function processFraudEntry() {
             const s_no = document.getElementById('sNoInput').value.trim();
+            const serviceName = document.getElementById('serviceNameInput').value.trim();
             const image = document.getElementById('imageUrlInput').value.trim();
             const actionBtn = document.getElementById('actionBtn');
             
@@ -394,7 +394,8 @@
                 }
             });
 
-            if(!s_no || whatsappLinks.length === 0 || !image) { 
+            // Validation updated for service name
+            if(!s_no || !serviceName || whatsappLinks.length === 0 || !image) { 
                 actionBtn.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> FILL FIELDS & WAIT ⚠️";
                 actionBtn.style.background = "#d29922";
                 setTimeout(() => {
@@ -406,9 +407,9 @@
             }
 
             if(editIndex === null) {
-                fraudArray.push({ s_no, image, whatsapp: whatsappLinks });
+                fraudArray.push({ s_no, serviceName, image, whatsapp: whatsappLinks });
             } else {
-                fraudArray[editIndex] = { s_no, image, whatsapp: whatsappLinks };
+                fraudArray[editIndex] = { s_no, serviceName, image, whatsapp: whatsappLinks };
                 editIndex = null;
                 document.getElementById('formTitle').innerHTML = "<i class='fa-solid fa-layer-group'></i> Add New Service Entry";
                 document.getElementById('actionBtn').className = "btn-pro btn-green";
@@ -419,6 +420,7 @@
                     <input type="url" class="input-pro whatsapp-input" placeholder="Service URL (e.g. https://your-site.com)">
                 </div>
             `;
+            document.getElementById('serviceNameInput').value = "";
             document.getElementById('imageUrlInput').value = "";
             document.getElementById('imagePreview').style.display = 'none';
             document.getElementById('imageInput').value = "";
@@ -452,13 +454,15 @@
 
             fraudArray.forEach((item, index) => {
                 let linkCount = Array.isArray(item.whatsapp) ? item.whatsapp.length : 1;
+                let displayTitle = item.serviceName ? item.serviceName : "Service Info";
+
                 container.innerHTML += `
                     <div class="list-item" draggable="true" data-index="${index}">
                         <div style="display: flex; align-items: center; flex: 1; padding-right: 15px; overflow: hidden;">
                             <span class="drag-icon"><i class="fa-solid fa-grip-vertical"></i></span>
                             <img src="${item.image}" class="icon-preview" alt="Img" onerror="this.src='https://via.placeholder.com/45?text=No+Img'">
                             <div>
-                                <strong style="color: #00ea77; font-size: 14px;"># ${item.s_no}</strong>
+                                <strong style="color: #00ea77; font-size: 14px;"># ${item.s_no} - ${displayTitle}</strong>
                                 <div style="font-size: 12px; color: #8b949e;">Links: ${linkCount} Service URL(s)</div>
                             </div>
                         </div>
@@ -505,13 +509,15 @@
             container.innerHTML = "";
             fraudArray.forEach((item, index) => {
                 let linkCount = Array.isArray(item.whatsapp) ? item.whatsapp.length : 1;
+                let displayTitle = item.serviceName ? item.serviceName : "Service Info";
+
                 container.innerHTML += `
                     <div class="list-item" draggable="true" data-index="${index}">
                         <div style="display: flex; align-items: center; flex: 1; padding-right: 15px; overflow: hidden;">
                             <span class="drag-icon"><i class="fa-solid fa-grip-vertical"></i></span>
                             <img src="${item.image}" class="icon-preview" alt="Img" onerror="this.src='https://via.placeholder.com/45?text=No+Img'">
                             <div>
-                                <strong style="color: #00ea77; font-size: 14px;"># ${item.s_no}</strong>
+                                <strong style="color: #00ea77; font-size: 14px;"># ${item.s_no} - ${displayTitle}</strong>
                                 <div style="font-size: 12px; color: #8b949e;">Links: ${linkCount} Service URL(s)</div>
                             </div>
                         </div>
@@ -528,6 +534,7 @@
             editIndex = index;
             const item = fraudArray[index];
             document.getElementById('sNoInput').value = item.s_no || "";
+            document.getElementById('serviceNameInput').value = item.serviceName || "";
             document.getElementById('imageUrlInput').value = item.image || "";
             
             const container = document.getElementById('whatsappFieldsContainer');
