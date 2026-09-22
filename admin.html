@@ -178,9 +178,8 @@
     <!-- Main Editor Section -->
     <div class="admin-box" id="editorSection" style="display:none; padding-top: 30px;">
         <h3 id="formTitle"><i class="fa-solid fa-layer-group"></i> Add New Service Entry</h3>
-        <p class="subtitle" style="margin-bottom: 20px;">Upload screenshot, name & link.</p>
+        <p class="subtitle" style="margin-bottom: 20px;">Upload screenshot or paste direct link.</p>
         
-        <!-- Updated input structure with Service Name -->
         <input type="text" id="sNoInput" class="input-pro" placeholder="S. No. (e.g. 1)">
         <input type="text" id="serviceNameInput" class="input-pro" placeholder="Service Name (e.g. Find Document)">
         
@@ -191,14 +190,16 @@
         </div>
         <button type="button" class="btn-add-more" onclick="addWhatsAppField()"><i class="fa-solid fa-plus"></i> ADD MORE LINK</button>
         
-        <!-- File Upload Box -->
+        <!-- Visible Image URL Input -->
+        <input type="url" id="imageUrlInput" class="input-pro" placeholder="Direct Image URL (e.g. https://i.ytimg.com/...)">
+
+        <!-- Optional File Upload Box -->
         <div class="file-upload-box" id="dropZone">
             <i class="fa-solid fa-cloud-arrow-up" style="font-size: 24px; color: #00d4ff; margin-bottom: 5px;"></i>
-            <div id="uploadText" style="font-size: 13px; color: #8b949e;">Click to browse OR Paste Screenshot (Ctrl + V)</div>
+            <div id="uploadText" style="font-size: 13px; color: #8b949e;">Or Click to browse Image</div>
             <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
             <img id="imagePreview" class="preview-img" alt="Preview">
         </div>
-        <input type="hidden" id="imageUrlInput">
         
         <button id="actionBtn" class="btn-pro btn-green" onclick="processFraudEntry()">
             <i class="fa-solid fa-plus"></i> ADD ENTRY
@@ -394,7 +395,7 @@
                 }
             });
 
-            // Validation updated for service name
+            // If image box is completely empty, give an error
             if(!s_no || !serviceName || whatsappLinks.length === 0 || !image) { 
                 actionBtn.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> FILL FIELDS & WAIT ⚠️";
                 actionBtn.style.background = "#d29922";
@@ -424,7 +425,7 @@
             document.getElementById('imageUrlInput').value = "";
             document.getElementById('imagePreview').style.display = 'none';
             document.getElementById('imageInput').value = "";
-            document.getElementById('uploadText').innerText = "Click to browse OR Paste Screenshot (Ctrl + V)";
+            document.getElementById('uploadText').innerText = "Or Click to browse Image";
 
             autoSuggestSNo();
 
