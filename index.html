@@ -11,7 +11,7 @@
         body { background: #0f1319; color: #c9d1d9; min-height: 100vh; padding: 25px; }
         .container { max-width: 1200px; margin: 0 auto; padding-bottom: 50px; }
         
-        /* Sabhi cards ko barabar rakhne ke liye grid stretch */
+        /* Grid Layout */
         .fraud-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
@@ -29,11 +29,11 @@
             flex-direction: column; 
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
             transition: transform 0.2s;
-            height: 100%; /* Height uniform */
+            height: 100%; 
         }
         .fraud-card:hover { transform: translateY(-3px); border-color: #00d4ff; }
         
-        /* Header single line no wrapping */
+        /* Header Details */
         .card-header { 
             padding: 14px 18px; 
             background: #1c2128; 
@@ -48,9 +48,9 @@
         }
         
         .service-title {
-            white-space: nowrap; /* Next line me nahi tootega */
+            white-space: nowrap; 
             overflow: hidden;
-            text-overflow: clip; /* Tukde na bane */
+            text-overflow: clip; 
             font-size: 14px;
             letter-spacing: 0.3px;
         }
@@ -66,7 +66,7 @@
             flex-shrink: 0;
         }
         
-        /* Har image ka size fix taaki cards upar neeche na ho */
+        /* Image Box - CONTAIN property add ki hai taaki Image cut na ho */
         .card-img-container { 
             width: 100%; 
             height: 210px; 
@@ -76,11 +76,12 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
+            padding: 5px; /* Thoda space dene ke liye */
         }
         .card-img-container img { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover; /* Ek jaisi image size */
+            object-fit: contain; /* Pehle 'cover' tha, ab 'contain' kar diya taaki full dikhe crop na ho */
             display: block;
             transition: transform 0.3s; 
         }
@@ -89,7 +90,7 @@
         .card-body { 
             padding: 15px; 
             background: #161b22; 
-            margin-top: auto; /* Button bottom me fix */
+            margin-top: auto; 
         }
 
         .details-btn {
@@ -119,7 +120,14 @@
         .modal-close { position: absolute; top: 15px; right: 20px; color: #da3633; font-size: 30px; cursor: pointer; font-weight: bold; background: none; border: none; transition: 0.2s;}
         .modal-close:hover { transform: rotate(90deg); }
 
-        .modal-img-content { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 0 25px rgba(0,0,0,0.8); }
+        /* Full Size View Modal - image cut nahi hogi */
+        .modal-img-content { 
+            max-width: 90%; 
+            max-height: 90%; 
+            border-radius: 8px; 
+            box-shadow: 0 0 25px rgba(0,0,0,0.8); 
+            object-fit: contain; 
+        }
 
         .details-modal-box {
             background: #161b22;
