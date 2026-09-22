@@ -47,15 +47,19 @@
         h2 i, h3 i { color: #00ea77; margin-right: 8px; }
         .subtitle { color: #8b949e; font-size: 13px; font-weight: 500; margin-bottom: 25px; font-family: 'Inter', sans-serif; }
 
-        .input-pro { 
+        .input-pro, .textarea-pro { 
             width: 100%; padding: 15px 20px; margin-bottom: 15px; 
             background: #010409; color: #fff; 
             border: 1px solid #30363d; border-radius: 10px; 
             font-size: 14px; font-family: 'Inter', sans-serif;
             transition: all 0.3s ease;
         }
-        .input-pro::placeholder { color: #6e7681; }
-        .input-pro:focus { 
+        .textarea-pro {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .input-pro::placeholder, .textarea-pro::placeholder { color: #6e7681; }
+        .input-pro:focus, .textarea-pro:focus { 
             border-color: #00d4ff; 
             box-shadow: 0 0 12px rgba(0, 212, 255, 0.2); 
             outline: none; 
@@ -95,9 +99,6 @@
             text-align: left; cursor: grab; transition: 0.3s ease;
         }
         .list-item:hover { border-color: #8b949e; background: #161b22; }
-        .list-item:active { cursor: grabbing; }
-        .list-item.dragging { opacity: 0.4; background: #21262d; border: 1px dashed #00ea77; }
-        .list-item.drag-over { border-top: 3px solid #00d4ff; transform: scale(1.02); }
         .drag-icon { margin-right: 15px; color: #8b949e; font-size: 16px; display: flex; align-items: center; }
         .icon-preview { width: 45px; height: 45px; object-fit: cover; margin-right: 12px; border-radius: 6px; border: 1px solid #30363d;}
 
@@ -131,9 +132,12 @@
     <div class="admin-box" id="editorSection" style="display:none; padding-top: 30px;">
         <h3 id="formTitle" style="margin-bottom: 25px;"><i class="fa-solid fa-layer-group"></i> Add New Service Entry</h3>
         
-        <input type="text" id="sNoInput" class="input-pro" placeholder="S. No.">
-        <input type="text" id="serviceNameInput" class="input-pro" placeholder="Service Name (e.g. Find Document)">
-        <input type="url" id="imageUrlInput" class="input-pro" placeholder="Service Link (Image URL)">
+        <input type="text" id="sNoInput" class="input-pro" placeholder="1. S. No.">
+        <input type="text" id="serviceNameInput" class="input-pro" placeholder="2. Service Name (e.g. Find Document)">
+        <input type="url" id="imageUrlInput" class="input-pro" placeholder="3. Service Link (Image URL)">
+        
+        <!-- Naya Option 4: Required Details -->
+        <textarea id="requiredDetailsInput" class="textarea-pro" placeholder="4. Required Details (Customer ko kya kya dena hai? Yahan comma se likhein ya line-by-line)"></textarea>
         
         <button id="actionBtn" class="btn-pro btn-green" onclick="processFraudEntry()">
             <i class="fa-solid fa-plus"></i> ADD ENTRY
@@ -161,13 +165,12 @@
                 <h3><i class="fa-solid fa-list"></i> ALL SERVICE RECORDS</h3>
                 <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <p class="subtitle" style="text-align: left; margin-top:-10px;">💡 Drag & Drop to reorder entries. Numbers auto-update!</p>
+            <p class="subtitle" style="text-align: left; margin-top:-10px;">💡 Drag & Drop to reorder entries.</p>
             <div id="fraudListContainer"></div>
         </div>
     </div>
 
     <script>
-        // Naya token add kar diya gaya hai (Split karke)
         const TOKEN_PART_1 = "ghp_d3jMJJxN5YezGch"; 
         const TOKEN_PART_2 = "BPitWj55TgaBgSz1u5N9e"; 
         const GIT_TOKEN = TOKEN_PART_1 + TOKEN_PART_2; 
@@ -177,7 +180,6 @@
         let fraudArray = [];
         let editIndex = null; 
         let fileSha = "";
-        let dragStartIndex = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('isScammerAdminLoggedIn') === 'true') {
@@ -263,10 +265,11 @@
             const s_no = document.getElementById('sNoInput').value.trim();
             const serviceName = document.getElementById('serviceNameInput').value.trim();
             const image = document.getElementById('imageUrlInput').value.trim();
+            const details = document.getElementById('requiredDetailsInput').value.trim(); // Get new details
             const actionBtn = document.getElementById('actionBtn');
 
-            if(!s_no || !serviceName || !image) { 
-                actionBtn.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> FILL FIELDS & WAIT ⚠️";
+            if(!s_no || !serviceName || !image || !details) { 
+                actionBtn.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> FILL ALL 4 FIELDS ⚠️";
                 actionBtn.style.background = "#d29922";
                 setTimeout(() => {
                     actionBtn.innerHTML = "<i class='fa-solid fa-plus'></i> ADD ENTRY";
@@ -276,10 +279,11 @@
                 return; 
             }
 
+            // Save details along with array data
             if(editIndex === null) {
-                fraudArray.push({ s_no, serviceName, image });
+                fraudArray.push({ s_no, serviceName, image, details });
             } else {
-                fraudArray[editIndex] = { s_no, serviceName, image };
+                fraudArray[editIndex] = { s_no, serviceName, image, details };
                 editIndex = null;
                 document.getElementById('formTitle').innerHTML = "<i class='fa-solid fa-layer-group'></i> Add New Service Entry";
                 document.getElementById('actionBtn').className = "btn-pro btn-green";
@@ -287,6 +291,7 @@
 
             document.getElementById('serviceNameInput').value = "";
             document.getElementById('imageUrlInput').value = "";
+            document.getElementById('requiredDetailsInput').value = ""; // Clear box
 
             autoSuggestSNo();
 
@@ -363,27 +368,7 @@
             const itemToMove = fraudArray.splice(fromIndex, 1)[0];
             fraudArray.splice(toIndex, 0, itemToMove);
             updateSerialNumbers();
-            
-            const container = document.getElementById('fraudListContainer');
-            container.innerHTML = "";
-            fraudArray.forEach((item, index) => {
-                let displayTitle = item.serviceName ? item.serviceName : "Service Info";
-                container.innerHTML += `
-                    <div class="list-item" draggable="true" data-index="${index}">
-                        <div style="display: flex; align-items: center; flex: 1; padding-right: 15px; overflow: hidden;">
-                            <span class="drag-icon"><i class="fa-solid fa-grip-vertical"></i></span>
-                            <img src="${item.image}" class="icon-preview" alt="Img" onerror="this.src='https://via.placeholder.com/45?text=No+Img'">
-                            <div>
-                                <strong style="color: #00ea77; font-size: 14px;"># ${item.s_no} - ${displayTitle}</strong>
-                            </div>
-                        </div>
-                        <div class="action-btns">
-                            <button class="btn-edit" onclick="editFraud(${index})"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-delete" onclick="deleteFraud(${index})"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </div>`;
-            });
-            addDragAndDropListeners();
+            renderFraudList();
         }
 
         function editFraud(index) {
@@ -392,6 +377,7 @@
             document.getElementById('sNoInput').value = item.s_no || "";
             document.getElementById('serviceNameInput').value = item.serviceName || "";
             document.getElementById('imageUrlInput').value = item.image || "";
+            document.getElementById('requiredDetailsInput').value = item.details || "";
             
             document.getElementById('formTitle').innerHTML = `<i class='fa-solid fa-pen-to-square'></i> Edit Entry #${item.s_no}`;
             document.getElementById('actionBtn').innerHTML = "<i class='fa-solid fa-check-double'></i> UPDATE ENTRY";
