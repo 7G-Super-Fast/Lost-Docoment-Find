@@ -33,7 +33,7 @@
             justify-content: space-between; 
             align-items: center; 
             font-weight: 700; 
-            font-size: 16px;
+            font-size: 15px;
             color: #00ea77; 
         }
         .s-no { background: #1f6feb; color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; }
@@ -90,8 +90,6 @@
         const TOKEN_PART_1 = "ghp_ib4h4kWYgpi9tp7N"; 
         const TOKEN_PART_2 = "WAmVKpx0IU4Gtk18s8tG"; 
         const GIT_TOKEN = TOKEN_PART_1 + TOKEN_PART_2; 
-        
-        // Yahan par naye repo ka naam update kiya gaya hai
         const myRepo = "7g-super-fast/Lost-Docoment-Find";
 
         async function loadData() {
@@ -122,8 +120,9 @@
 
             grid.innerHTML = data.map((item, index) => {
                 let sNo = item.s_no || (index + 1);
+                // Naya Service Name title
+                let serviceTitle = item.serviceName ? item.serviceName : "Service Info ⚡";
                 
-                // Direct WhatsApp Button with your number
                 let actionHtml = `
                     <a href="https://wa.me/919870981319" target="_blank" class="whatsapp-btn">
                         <i class="fa-brands fa-whatsapp fa-lg"></i> Contact on WhatsApp
@@ -133,7 +132,7 @@
                 return `
                     <div class="fraud-card">
                         <div class="card-header">
-                            <span>Service Info ⚡</span>
+                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 75%;">${serviceTitle}</span>
                             <span class="s-no"># ${sNo}</span>
                         </div>
                         <div class="card-img-container" onclick="openModal('${item.image}')">
