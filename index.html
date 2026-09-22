@@ -25,19 +25,35 @@
         }
         .fraud-card:hover { transform: translateY(-3px); border-color: #00d4ff; }
         
+        /* Updated Header CSS for perfect line wrap */
         .card-header { 
             padding: 12px 18px; 
             background: #1c2128; 
             border-bottom: 1px solid #30363d; 
             display: flex; 
             justify-content: space-between; 
-            align-items: flex-start; /* Changed to flex-start for multiline text */
+            align-items: flex-start; /* Text wrap hone par button upar hi rahega */
+            gap: 15px; /* Title aur button ke beech thoda gap */
             font-weight: 700; 
             font-size: 15px;
             color: #00ea77; 
-            gap: 10px;
         }
-        .s-no { background: #1f6feb; color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; height: fit-content; white-space: nowrap; }
+        .service-title {
+            flex: 1; /* Bachi hui puri jagah title lega */
+            white-space: normal; /* Lamba text agli line me chala jayega */
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        .s-no { 
+            background: #1f6feb; 
+            color: white; 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            white-space: nowrap; 
+            flex-shrink: 0; /* Ye line button ko dabne/chota hone se rokegi */
+        }
         
         .card-img-container { 
             width: 100%; 
@@ -214,8 +230,7 @@
                 return `
                     <div class="fraud-card">
                         <div class="card-header">
-                            <!-- Removed dot-dot logic, full text will show and wrap naturally -->
-                            <span style="word-wrap: break-word; flex: 1; line-height: 1.4; padding-right: 10px;">${serviceTitle}</span>
+                            <span class="service-title">${serviceTitle}</span>
                             <span class="s-no"># ${sNo}</span>
                         </div>
                         <div class="card-img-container" onclick="openImgModal('${item.image}')">
