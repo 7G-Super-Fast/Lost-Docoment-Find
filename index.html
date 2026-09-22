@@ -31,12 +31,13 @@
             border-bottom: 1px solid #30363d; 
             display: flex; 
             justify-content: space-between; 
-            align-items: center; 
+            align-items: flex-start; /* Changed to flex-start for multiline text */
             font-weight: 700; 
             font-size: 15px;
             color: #00ea77; 
+            gap: 10px;
         }
-        .s-no { background: #1f6feb; color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+        .s-no { background: #1f6feb; color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; height: fit-content; white-space: nowrap; }
         
         .card-img-container { 
             width: 100%; 
@@ -57,7 +58,7 @@
         
         .card-body { padding: 15px; background: #161b22; }
 
-        /* Blue Details Button replacing WhatsApp in Card */
+        /* Blue Details Button */
         .details-btn {
             display: flex; align-items: center; justify-content: center; gap: 8px; 
             background: #1f6feb; color: white; padding: 14px; 
@@ -77,7 +78,7 @@
         /* Image Preview Modal Specific */
         .modal-img-content { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 0 25px rgba(0,0,0,0.8); }
 
-        /* Details Popup Modal Specific (Auto width format with proper wrapping) */
+        /* Details Popup Modal Specific */
         .details-modal-box {
             background: #161b22;
             padding: 40px 30px 30px 30px;
@@ -85,18 +86,18 @@
             border: 1px solid #00ea77;
             width: auto;
             min-width: 320px;
-            max-width: 90%; /* Stops it from overflowing off-screen on huge text */
+            max-width: 90%; 
             box-shadow: 0 15px 40px rgba(0,0,0,0.5);
             position: relative;
         }
-        .details-title { color: #00ea77; font-size: 18px; font-weight: 700; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .details-title { color: #00ea77; font-size: 18px; font-weight: 700; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px; line-height: 1.4; word-wrap: break-word; }
         
         .details-text { 
             color: #c9d1d9; 
             font-size: 15px; 
             line-height: 1.8; 
-            white-space: pre-wrap; /* Keeps line breaks user added in admin */
-            word-wrap: break-word; /* Prevents long unbreakable links from hiding */
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
             margin-bottom: 25px; 
         }
 
@@ -162,7 +163,7 @@
     <div id="detailsModal" class="modal" onclick="closeDetailsModal(event)">
         <div class="details-modal-box" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeDetailsModal(event)" style="top: 10px; right: 15px;">&times;</button>
-            <div class="details-title"><i class="fa-solid fa-clipboard-list"></i> Required Details</div>
+            <div id="popupDetailsTitle" class="details-title"><i class="fa-solid fa-clipboard-list"></i> Required Details</div>
             
             <div id="popupDetailsText" class="details-text">
                 <!-- Text dynamically inject hoga -->
@@ -181,7 +182,6 @@
         
         const myRepo = "7g-super-fast/Lost-Docoment-Find";
 
-        // Globally storing data to fetch details later on click
         let windowFraudData = [];
 
         async function loadData() {
@@ -214,7 +214,8 @@
                 return `
                     <div class="fraud-card">
                         <div class="card-header">
-                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 75%;">${serviceTitle}</span>
+                            <!-- Removed dot-dot logic, full text will show and wrap naturally -->
+                            <span style="word-wrap: break-word; flex: 1; line-height: 1.4; padding-right: 10px;">${serviceTitle}</span>
                             <span class="s-no"># ${sNo}</span>
                         </div>
                         <div class="card-img-container" onclick="openImgModal('${item.image}')">
@@ -244,7 +245,9 @@
         function openDetailsModal(index) {
             let item = windowFraudData[index];
             let details = item.details ? item.details : "No specific details mentioned for this service.";
+            let title = item.serviceName ? item.serviceName : "Required Details";
             
+            document.getElementById('popupDetailsTitle').innerHTML = `<i class="fa-solid fa-clipboard-list"></i> ${title}`;
             document.getElementById('popupDetailsText').innerText = details;
             document.getElementById('detailsModal').style.display = 'flex';
         }
