@@ -90,7 +90,9 @@
         const TOKEN_PART_1 = "ghp_ib4h4kWYgpi9tp7N"; 
         const TOKEN_PART_2 = "WAmVKpx0IU4Gtk18s8tG"; 
         const GIT_TOKEN = TOKEN_PART_1 + TOKEN_PART_2; 
-        const myRepo = "6G-Super-Fast/Scammer-Person";
+        
+        // Yahan par naye repo ka naam update kiya gaya hai
+        const myRepo = "7g-super-fast/Lost-Docoment-Find";
 
         async function loadData() {
             let fraudData = [];
@@ -114,13 +116,14 @@
         function renderCards(data) {
             const grid = document.getElementById('fraudGrid');
             if (!data || data.length === 0) {
-                grid.innerHTML = `<div class="no-data">No records found. Please add entries from Admin Panel.</div>`;
+                grid.innerHTML = `<div class="no-data">No services found. Please add entries from Admin Panel.</div>`;
                 return;
             }
 
             grid.innerHTML = data.map((item, index) => {
                 let sNo = item.s_no || (index + 1);
                 
+                // Direct WhatsApp Button with your number
                 let actionHtml = `
                     <a href="https://wa.me/919870981319" target="_blank" class="whatsapp-btn">
                         <i class="fa-brands fa-whatsapp fa-lg"></i> Contact on WhatsApp
