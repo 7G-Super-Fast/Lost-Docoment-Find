@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Scammer Person - Admin Dashboard ⚡</title>
+    <title>My Services - Admin Dashboard ⚡</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
@@ -66,7 +66,6 @@
         .btn-remove-link { background: #da3633; color: #fff; border: none; border-radius: 8px; width: 45px; height: 48px; cursor: pointer; transition: 0.3s; flex-shrink: 0; }
         .btn-remove-link:hover { background: #f85149; }
 
-        /* Updated Add More Button Style (Black & Matching with Form) */
         .btn-add-more { 
             background: #010409; 
             color: #00d4ff; 
@@ -168,8 +167,8 @@
 
     <!-- Login Section -->
     <div class="admin-box" id="loginSection">
-        <h2><i class="fa-solid fa-shield-halved"></i> Scammer Admin Portal</h2>
-        <p class="subtitle">Secure Control Room for Scammer List</p>
+        <h2><i class="fa-solid fa-shield-halved"></i> Service Admin Portal</h2>
+        <p class="subtitle">Secure Control Room for Your Services</p>
         
         <button class="btn-pro btn-green" style="margin-top: 15px;" onclick="loadDataFromCloud()">
             <i class="fa-solid fa-right-to-bracket"></i> ENTER ADMIN PANEL
@@ -178,15 +177,15 @@
 
     <!-- Main Editor Section -->
     <div class="admin-box" id="editorSection" style="display:none; padding-top: 30px;">
-        <h3 id="formTitle"><i class="fa-solid fa-triangle-exclamation"></i> Add New Scammer Entry</h3>
-        <p class="subtitle" style="margin-bottom: 20px;">Upload screenshot & WhatsApp links for public index.</p>
+        <h3 id="formTitle"><i class="fa-solid fa-layer-group"></i> Add New Service Entry</h3>
+        <p class="subtitle" style="margin-bottom: 20px;">Upload screenshot & add service link.</p>
         
         <input type="text" id="sNoInput" class="input-pro" placeholder="S. No. (e.g. 1)">
         
-        <!-- Dynamic WhatsApp Links Container -->
+        <!-- Dynamic Service Links Container -->
         <div id="whatsappFieldsContainer">
             <div class="whatsapp-group">
-                <input type="url" class="input-pro whatsapp-input" placeholder="WhatsApp URL (https://wa.me/...)">
+                <input type="url" class="input-pro whatsapp-input" placeholder="Service URL (e.g. https://your-site.com)">
             </div>
         </div>
         <button type="button" class="btn-add-more" onclick="addWhatsAppField()"><i class="fa-solid fa-plus"></i> ADD MORE LINK</button>
@@ -223,7 +222,7 @@
     <div id="listModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-list"></i> ALL SCAMMER RECORDS LIST</h3>
+                <h3><i class="fa-solid fa-list"></i> ALL SERVICE RECORDS</h3>
                 <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <p class="subtitle" style="text-align: left; margin-top:-10px;">💡 Drag & Drop to reorder entries. Numbers auto-update!</p>
@@ -271,7 +270,7 @@
             div.className = 'whatsapp-group';
             div.style.marginTop = '10px';
             div.innerHTML = `
-                <input type="url" class="input-pro whatsapp-input" placeholder="WhatsApp URL (https://wa.me/...)" value="${value}">
+                <input type="url" class="input-pro whatsapp-input" placeholder="Service URL (e.g. https://your-site.com)" value="${value}">
                 <button type="button" class="btn-remove-link" onclick="this.parentElement.remove()"><i class="fa-solid fa-trash"></i></button>
             `;
             container.appendChild(div);
@@ -409,13 +408,13 @@
             } else {
                 fraudArray[editIndex] = { s_no, image, whatsapp: whatsappLinks };
                 editIndex = null;
-                document.getElementById('formTitle').innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> Add New Scammer Entry";
+                document.getElementById('formTitle').innerHTML = "<i class='fa-solid fa-layer-group'></i> Add New Service Entry";
                 document.getElementById('actionBtn').className = "btn-pro btn-green";
             }
 
             document.getElementById('whatsappFieldsContainer').innerHTML = `
                 <div class="whatsapp-group">
-                    <input type="url" class="input-pro whatsapp-input" placeholder="WhatsApp URL (https://wa.me/...)">
+                    <input type="url" class="input-pro whatsapp-input" placeholder="Service URL (e.g. https://your-site.com)">
                 </div>
             `;
             document.getElementById('imageUrlInput').value = "";
@@ -458,7 +457,7 @@
                             <img src="${item.image}" class="icon-preview" alt="Img" onerror="this.src='https://via.placeholder.com/45?text=No+Img'">
                             <div>
                                 <strong style="color: #00ea77; font-size: 14px;"># ${item.s_no}</strong>
-                                <div style="font-size: 12px; color: #8b949e;">Links: ${linkCount} WhatsApp Number(s)</div>
+                                <div style="font-size: 12px; color: #8b949e;">Links: ${linkCount} Service URL(s)</div>
                             </div>
                         </div>
                         <div class="action-btns">
@@ -511,7 +510,7 @@
                             <img src="${item.image}" class="icon-preview" alt="Img" onerror="this.src='https://via.placeholder.com/45?text=No+Img'">
                             <div>
                                 <strong style="color: #00ea77; font-size: 14px;"># ${item.s_no}</strong>
-                                <div style="font-size: 12px; color: #8b949e;">Links: ${linkCount} WhatsApp Number(s)</div>
+                                <div style="font-size: 12px; color: #8b949e;">Links: ${linkCount} Service URL(s)</div>
                             </div>
                         </div>
                         <div class="action-btns">
@@ -578,7 +577,7 @@
                     method: 'PUT',
                     headers: { 'Authorization': `token ${GIT_TOKEN}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        message: "Update entries & multi-whatsapp grid via Admin Panel", 
+                        message: "Update entries via Admin Panel", 
                         content: encodedContent, 
                         sha: fileSha ? fileSha : undefined 
                     })
