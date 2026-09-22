@@ -9,9 +9,16 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background: #0f1319; color: #c9d1d9; min-height: 100vh; padding: 25px; }
-        .container { max-width: 1100px; margin: 0 auto; padding-bottom: 50px; }
+        .container { max-width: 1200px; margin: 0 auto; padding-bottom: 50px; }
         
-        .fraud-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start; margin-bottom: 40px; }
+        /* Sabhi cards ko barabar rakhne ke liye grid stretch */
+        .fraud-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
+            gap: 25px; 
+            align-items: stretch; 
+            margin-bottom: 40px; 
+        }
         
         .fraud-card { 
             background: #161b22; 
@@ -22,28 +29,32 @@
             flex-direction: column; 
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
             transition: transform 0.2s;
+            height: 100%; /* Height uniform */
         }
         .fraud-card:hover { transform: translateY(-3px); border-color: #00d4ff; }
         
-        /* Updated Header CSS for perfect line wrap */
+        /* Header single line no wrapping */
         .card-header { 
-            padding: 12px 18px; 
+            padding: 14px 18px; 
             background: #1c2128; 
             border-bottom: 1px solid #30363d; 
             display: flex; 
             justify-content: space-between; 
-            align-items: flex-start; /* Text wrap hone par button upar hi rahega */
-            gap: 15px; /* Title aur button ke beech thoda gap */
+            align-items: center; 
+            gap: 12px; 
             font-weight: 700; 
             font-size: 15px;
             color: #00ea77; 
         }
+        
         .service-title {
-            flex: 1; /* Bachi hui puri jagah title lega */
-            white-space: normal; /* Lamba text agli line me chala jayega */
-            word-wrap: break-word;
-            line-height: 1.4;
+            white-space: nowrap; /* Next line me nahi tootega */
+            overflow: hidden;
+            text-overflow: clip; /* Tukde na bane */
+            font-size: 14px;
+            letter-spacing: 0.3px;
         }
+        
         .s-no { 
             background: #1f6feb; 
             color: white; 
@@ -52,12 +63,14 @@
             font-size: 13px; 
             font-weight: 600; 
             white-space: nowrap; 
-            flex-shrink: 0; /* Ye line button ko dabne/chota hone se rokegi */
+            flex-shrink: 0;
         }
         
+        /* Har image ka size fix taaki cards upar neeche na ho */
         .card-img-container { 
             width: 100%; 
-            background: #161b22; 
+            height: 210px; 
+            background: #0d1117; 
             overflow: hidden; 
             cursor: pointer; 
             display: flex; 
@@ -66,21 +79,36 @@
         }
         .card-img-container img { 
             width: 100%; 
-            height: auto; 
+            height: 100%; 
+            object-fit: cover; /* Ek jaisi image size */
             display: block;
             transition: transform 0.3s; 
         }
-        .card-img-container:hover img { transform: scale(1.02); }
+        .card-img-container:hover img { transform: scale(1.03); }
         
-        .card-body { padding: 15px; background: #161b22; }
+        .card-body { 
+            padding: 15px; 
+            background: #161b22; 
+            margin-top: auto; /* Button bottom me fix */
+        }
 
-        /* Blue Details Button */
         .details-btn {
-            display: flex; align-items: center; justify-content: center; gap: 8px; 
-            background: #1f6feb; color: white; padding: 14px; 
-            border-radius: 8px; border: none; font-weight: 600; font-size: 14px;
-            cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 12px rgba(31, 111, 235, 0.2);
-            width: 100%; font-family: 'Poppins', sans-serif;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            background: #1f6feb; 
+            color: white; 
+            padding: 13px; 
+            border-radius: 8px; 
+            border: none; 
+            font-weight: 600; 
+            font-size: 14px;
+            cursor: pointer; 
+            transition: background 0.2s; 
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.2);
+            width: 100%; 
+            font-family: 'Poppins', sans-serif;
         }
         .details-btn:hover { background: #388bfd; }
         
@@ -91,10 +119,8 @@
         .modal-close { position: absolute; top: 15px; right: 20px; color: #da3633; font-size: 30px; cursor: pointer; font-weight: bold; background: none; border: none; transition: 0.2s;}
         .modal-close:hover { transform: rotate(90deg); }
 
-        /* Image Preview Modal Specific */
         .modal-img-content { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 0 25px rgba(0,0,0,0.8); }
 
-        /* Details Popup Modal Specific */
         .details-modal-box {
             background: #161b22;
             padding: 40px 30px 30px 30px;
@@ -117,7 +143,6 @@
             margin-bottom: 25px; 
         }
 
-        /* Direct contact from popup */
         .popup-wa-btn {
             display: flex; align-items: center; justify-content: center; gap: 8px; 
             background: #2ea043; color: white; padding: 12px 20px; 
@@ -146,12 +171,11 @@
             transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(46, 160, 67, 0.3); letter-spacing: 0.5px;
         }
         .main-whatsapp-btn:hover { background: #238636; transform: translateY(-3px); box-shadow: 0 8px 25px rgba(46, 160, 67, 0.5); }
-
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Grid for Services -->
+        <!-- Uniform Grid -->
         <div id="fraudGrid" class="fraud-grid">
             <div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading services...</div>
         </div>
@@ -161,7 +185,7 @@
             <h3><i class="fa-solid fa-file-shield" style="color: #00ea77;"></i> All Types of Lost Documents Recovered Here</h3>
             <p>
                 Hamare pass khoye hue documents nikale jate hai.<br>
-                <strong>Example:</strong> Driving Licence, Aadhar Card, Ration Card, PAN Card, Ayusman Card, Caste Certificate, Domicile, Income Certificate, Udyam MSME PDF, Lost West Bengal Birth Certificate etc.
+                <strong>Example:</strong> Driving Licence, Ration Card, PAN Card, Ayusman Card, Caste Certificate, Domicile, Income Certificate, Udyam MSME PDF, Lost West Bengal Birth Certificate etc.
             </p>
             <a href="https://wa.me/919870981319" target="_blank" class="main-whatsapp-btn">
                 <i class="fa-brands fa-whatsapp fa-xl"></i> Contact us on WhatsApp
@@ -181,9 +205,7 @@
             <button class="modal-close" onclick="closeDetailsModal(event)" style="top: 10px; right: 15px;">&times;</button>
             <div id="popupDetailsTitle" class="details-title"><i class="fa-solid fa-clipboard-list"></i> Required Details</div>
             
-            <div id="popupDetailsText" class="details-text">
-                <!-- Text dynamically inject hoga -->
-            </div>
+            <div id="popupDetailsText" class="details-text"></div>
             
             <a href="https://wa.me/919870981319" target="_blank" class="popup-wa-btn">
                 <i class="fa-brands fa-whatsapp fa-lg"></i> Send Details on WhatsApp
@@ -230,11 +252,11 @@
                 return `
                     <div class="fraud-card">
                         <div class="card-header">
-                            <span class="service-title">${serviceTitle}</span>
+                            <span class="service-title" title="${serviceTitle}">${serviceTitle}</span>
                             <span class="s-no"># ${sNo}</span>
                         </div>
                         <div class="card-img-container" onclick="openImgModal('${item.image}')">
-                            <img src="${item.image}" alt="Screenshot" onerror="this.src='https://via.placeholder.com/300x220?text=No+Image'">
+                            <img src="${item.image}" alt="Screenshot" onerror="this.src='https://via.placeholder.com/340x210?text=No+Image'">
                         </div>
                         <div class="card-body">
                             <button class="details-btn" onclick="openDetailsModal(${index})">
@@ -246,7 +268,6 @@
             }).join('');
         }
 
-        // Image Modal Logic
         function openImgModal(src) {
             document.getElementById('modalImg').src = src;
             document.getElementById('imgModal').style.display = 'flex';
@@ -256,7 +277,6 @@
             document.getElementById('imgModal').style.display = 'none';
         }
 
-        // Required Details Popup Logic
         function openDetailsModal(index) {
             let item = windowFraudData[index];
             let details = item.details ? item.details : "No specific details mentioned for this service.";
